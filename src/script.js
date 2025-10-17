@@ -11,7 +11,7 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Textures
+ * Textures (from PDF Page 34)
  */
 const textureLoader = new THREE.TextureLoader()
 const doorColorTexture = textureLoader.load('/textures/door/color.jpg')
@@ -24,144 +24,114 @@ const doorRoughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
 const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
 const gradientTexture = textureLoader.load('/textures/gradients/3.jpg')
 
-// Fix gradient texture for toon material
+// Fix gradient texture for toon material (from PDF Page 42)
 gradientTexture.minFilter = THREE.NearestFilter
 gradientTexture.magFilter = THREE.NearestFilter
 gradientTexture.generateMipmaps = false
 
 /**
- * Objects - Different geometries for each material with brighter colors
+ * Objects - Using only sphere, plane, and torus as shown in PDF (Page 33)
  */
-
-// MeshBasicMaterial - SPHERE (Bright Red)
 const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32)
-const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 })
-const sphere = new THREE.Mesh(sphereGeometry, basicMaterial)
-sphere.position.x = -1.5
-scene.add(sphere)
-
-// MeshNormalMaterial - PLANE (Natural colors - can't change)
 const planeGeometry = new THREE.PlaneGeometry(1, 1, 100, 100)
-const normalMaterial = new THREE.MeshNormalMaterial()
-normalMaterial.flatShading = true
-const plane = new THREE.Mesh(planeGeometry, normalMaterial)
-scene.add(plane)
+const torusGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64)
 
-// MeshMatcapMaterial - TORUS (Bright Blue)
-const torusGeometry = new THREE.TorusGeometry(0.3, 0.2, 16, 32)
-const matcapMaterial = new THREE.MeshMatcapMaterial()
-matcapMaterial.matcap = matcapTexture
-const torus = new THREE.Mesh(torusGeometry, matcapMaterial)
-torus.position.x = 1.5
-scene.add(torus)
-
-// MeshDepthMaterial - BOX (White to Black - can't change)
-const boxGeometry = new THREE.BoxGeometry(0.7, 0.7, 0.7)
-const depthMaterial = new THREE.MeshDepthMaterial()
-const box = new THREE.Mesh(boxGeometry, depthMaterial)
-box.position.y = -1.5
-scene.add(box)
+// Set up UV2 for ambient occlusion (from PDF Page 45)
+sphereGeometry.setAttribute('uv2', new THREE.BufferAttribute(sphereGeometry.attributes.uv.array, 2))
+planeGeometry.setAttribute('uv2', new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2))
+torusGeometry.setAttribute('uv2', new THREE.BufferAttribute(torusGeometry.attributes.uv.array, 2))
 
 /**
- * Lights for materials that need them
+ * Lights for materials that need them (from PDF Page 40)
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8) // Brighter ambient light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
 scene.add(ambientLight)
 
-const pointLight = new THREE.PointLight(0xffffff, 1.0) // Brighter point light
+const pointLight = new THREE.PointLight(0xffffff, 0.5)
 pointLight.position.x = 2
 pointLight.position.y = 3
 pointLight.position.z = 4
 scene.add(pointLight)
 
-// MeshLambertMaterial - CONE (Bright Green)
-const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32)
-const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0x44ff44 })
-const cone = new THREE.Mesh(coneGeometry, lambertMaterial)
-cone.position.x = -1.5
-cone.position.y = 1.5
-scene.add(cone)
+/**
+ * Test different materials on the three geometries (from PDF Pages 34-48)
+ */
 
-// MeshPhongMaterial - CYLINDER (Bright Yellow)
-const cylinderGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32)
-const phongMaterial = new THREE.MeshPhongMaterial({ 
-    color: 0xffff44,
-    shininess: 100,
-    specular: new THREE.Color(0xffffff) // White specular for brightness
-})
-const cylinder = new THREE.Mesh(cylinderGeometry, phongMaterial)
-cylinder.position.y = 1.5
-scene.add(cylinder)
+// MeshBasicMaterial (PDF Page 34-36)
+const basicMaterial = new THREE.MeshBasicMaterial()
+basicMaterial.map = doorColorTexture
+const basicSphere = new THREE.Mesh(sphereGeometry, basicMaterial)
+basicSphere.position.x = -1.5
+scene.add(basicSphere)
 
-// MeshToonMaterial - OCTAHEDRON (Bright Purple)
-const octahedronGeometry = new THREE.OctahedronGeometry(0.5, 0)
-const toonMaterial = new THREE.MeshToonMaterial({ color: 0xff44ff })
-toonMaterial.gradientMap = gradientTexture
-const octahedron = new THREE.Mesh(octahedronGeometry, toonMaterial)
-octahedron.position.x = 1.5
-octahedron.position.y = 1.5
-scene.add(octahedron)
+const basicPlane = new THREE.Mesh(planeGeometry, basicMaterial)
+scene.add(basicPlane)
 
-// MeshStandardMaterial (PBR) - SPHERE (Bright Orange)
-const detailedSphereGeometry = new THREE.SphereGeometry(0.5, 64, 64)
-const standardMaterial = new THREE.MeshStandardMaterial({ 
-    color: 0xff8844,
-    metalness: 0.3, // Lower metalness for brighter color
-    roughness: 0.2
-})
+const basicTorus = new THREE.Mesh(torusGeometry, basicMaterial)
+basicTorus.position.x = 1.5
+scene.add(basicTorus)
 
-// Set up UV2 for ambient occlusion
-detailedSphereGeometry.setAttribute('uv2', new THREE.BufferAttribute(detailedSphereGeometry.attributes.uv.array, 2))
+// MeshNormalMaterial (PDF Page 37-38)
+const normalMaterial = new THREE.MeshNormalMaterial()
+normalMaterial.flatShading = true
+const normalSphere = new THREE.Mesh(sphereGeometry, normalMaterial)
+normalSphere.position.x = -1.5
+normalSphere.position.y = -1.5
+scene.add(normalSphere)
 
+const normalPlane = new THREE.Mesh(planeGeometry, normalMaterial)
+normalPlane.position.y = -1.5
+scene.add(normalPlane)
+
+const normalTorus = new THREE.Mesh(torusGeometry, normalMaterial)
+normalTorus.position.x = 1.5
+normalTorus.position.y = -1.5
+scene.add(normalTorus)
+
+// MeshMatcapMaterial (PDF Page 38-39)
+const matcapMaterial = new THREE.MeshMatcapMaterial()
+matcapMaterial.matcap = matcapTexture
+const matcapSphere = new THREE.Mesh(sphereGeometry, matcapMaterial)
+matcapSphere.position.x = -1.5
+matcapSphere.position.y = 1.5
+scene.add(matcapSphere)
+
+const matcapPlane = new THREE.Mesh(planeGeometry, matcapMaterial)
+matcapPlane.position.y = 1.5
+scene.add(matcapPlane)
+
+const matcapTorus = new THREE.Mesh(torusGeometry, matcapMaterial)
+matcapTorus.position.x = 1.5
+matcapTorus.position.y = 1.5
+scene.add(matcapTorus)
+
+// MeshStandardMaterial with PBR textures (PDF Pages 43-48)
+const standardMaterial = new THREE.MeshStandardMaterial()
+standardMaterial.metalness = 0.7
+standardMaterial.roughness = 0.2
 standardMaterial.map = doorColorTexture
 standardMaterial.aoMap = doorAmbientOcclusionTexture
-standardMaterial.aoMapIntensity = 0.5 // Lower AO for brightness
+standardMaterial.aoMapIntensity = 1
 standardMaterial.displacementMap = doorHeightTexture
-standardMaterial.displacementScale = 0.03
+standardMaterial.displacementScale = 0.05
 standardMaterial.metalnessMap = doorMetalnessTexture
 standardMaterial.roughnessMap = doorRoughnessTexture
 standardMaterial.normalMap = doorNormalTexture
-standardMaterial.normalScale.set(0.3, 0.3)
+standardMaterial.normalScale.set(0.5, 0.5)
 
-const detailedSphere = new THREE.Mesh(detailedSphereGeometry, standardMaterial)
-detailedSphere.position.x = -1.5
-detailedSphere.position.y = -1.5
-scene.add(detailedSphere)
+const standardSphere = new THREE.Mesh(sphereGeometry, standardMaterial)
+standardSphere.position.x = -1.5
+standardSphere.position.y = -3
+scene.add(standardSphere)
 
-// MeshPhysicalMaterial - DODECAHEDRON (Bright Cyan)
-const dodecahedronGeometry = new THREE.DodecahedronGeometry(0.4, 0)
-const physicalMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0x44ffff,
-    roughness: 0.1, // Lower roughness for shininess
-    metalness: 0.2,
-    clearcoat: 0.8,
-    clearcoatRoughness: 0.1
-})
-const dodecahedron = new THREE.Mesh(dodecahedronGeometry, physicalMaterial)
-dodecahedron.position.y = -1.5
-scene.add(dodecahedron)
+const standardPlane = new THREE.Mesh(planeGeometry, standardMaterial)
+standardPlane.position.y = -3
+scene.add(standardPlane)
 
-// Environment Map - TORUS KNOT (Bright Pink)
-const torusKnotGeometry = new THREE.TorusKnotGeometry(0.3, 0.1, 100, 16)
-const cubeTextureLoader = new THREE.CubeTextureLoader()
-const environmentMapTexture = cubeTextureLoader.load([
-    '/textures/environmentMaps/0/px.jpg',
-    '/textures/environmentMaps/0/nx.jpg',
-    '/textures/environmentMaps/0/py.jpg',
-    '/textures/environmentMaps/0/ny.jpg',
-    '/textures/environmentMaps/0/pz.jpg',
-    '/textures/environmentMaps/0/nz.jpg'
-])
-
-const torusKnot = new THREE.Mesh(torusKnotGeometry, new THREE.MeshStandardMaterial({
-    color: 0xff88ff,
-    metalness: 0.4,
-    roughness: 0.1,
-    envMap: environmentMapTexture
-}))
-torusKnot.position.x = 1.5
-torusKnot.position.y = -1.5
-scene.add(torusKnot)
+const standardTorus = new THREE.Mesh(torusGeometry, standardMaterial)
+standardTorus.position.x = 1.5
+standardTorus.position.y = -3
+scene.add(standardTorus)
 
 /**
  * Sizes
@@ -193,7 +163,7 @@ window.addEventListener('resize', () =>
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 1
 camera.position.y = 1
-camera.position.z = 2
+camera.position.z = 4
 scene.add(camera)
 
 // Controls
@@ -210,7 +180,7 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
- * Animate
+ * Animate (from PDF Page 33)
  */
 const clock = new THREE.Clock()
 
@@ -218,16 +188,17 @@ const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
-    // Rotate all objects
+    // Update objects rotation (from PDF Page 33)
     const objects = [
-        sphere, plane, torus, box,
-        cone, cylinder, octahedron, detailedSphere,
-        dodecahedron, torusKnot
+        basicSphere, basicPlane, basicTorus,
+        normalSphere, normalPlane, normalTorus,
+        matcapSphere, matcapPlane, matcapTorus,
+        standardSphere, standardPlane, standardTorus
     ]
     
-    objects.forEach(object => {
-        object.rotation.y = 0.1 * elapsedTime
-        object.rotation.x = 0.15 * elapsedTime
+    objects.forEach(obj => {
+        obj.rotation.y = 0.1 * elapsedTime
+        obj.rotation.x = 0.15 * elapsedTime
     })
 
     // Update controls
